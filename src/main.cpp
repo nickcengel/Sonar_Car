@@ -13,16 +13,19 @@ int LmotorPin2 = 5;
 int RmotorPin1 = 6;
 int RmotorPin2 = 9;
 
-// motor objects for Left and Right Motors
+int lightSensorPin = A0;
+int oldLight = 0;
+int newLight = 0;
+
+int LEDpin1 = 8;
+int LEDpin2 = 15;
+
 Dmotor Lmotor(LmotorPin1, LmotorPin2);
 Dmotor Rmotor(RmotorPin1, RmotorPin2);
 
-// Distance sensor object
 NewPing sonar(triggerPin, echoPin);
 
 void setup() {
-  // For debugging
-  Serial.begin(115200);
 
   pinMode(LmotorPin1, OUTPUT);
   pinMode(LmotorPin2, OUTPUT);
@@ -30,21 +33,45 @@ void setup() {
   pinMode(RmotorPin1, OUTPUT);
   pinMode(RmotorPin2, OUTPUT);
 
+  pinMode(LEDpin1, OUTPUT);
+  pinMode(LEDpin2, OUTPUT);
+
   Lmotor.begin();
   Rmotor.begin();
 
-  // Start out with the motors stopped
   Lmotor.Go(STOP);
   Rmotor.Go(STOP);
+
+  delay(2000);
+  oldLight = analogRead(lightSensorPin);
 }
 
 void loop() {
-  delay(75);                      // Wait
-  int distance = sonar.ping_in(); // Measure Distanfce
-  Serial.println(distance);       // Display distance in serial monitor
-  Serial.println("inches");
+  // digitalWrite(LEDpin, LOW);
 
-  // Move the motors
   Lmotor.Go(FORWARDS);
   Rmotor.Go(FORWARDS);
+  delay(100);
+
+  int distance = sonar.ping_in();
+
+  if ((distance > 0) & (distance < 8)) {
+    digitalWrite(LEDpin2, HIGH);
+    Lmotor.Go(FORWARDS);
+    Rmotor.Go(BACKWARDS);
+    delay(700);
+  } else
+    digitalWrite(LEDpin2, LOW);
+
+  newLight = analogRead(lightSensorPin);
+
+  if (newLight < oldLight) {
+    Lmotor.Go(BACKWARDS);
+    Rmotor.Go(FORWARDS);
+    digitalWrite(LEDpin1, HIGH);
+    delay(100);
+  } else
+    digitalWrite(LEDpin1, LOW);
+
+  oldLight = newLight;
 }
