@@ -1,6 +1,7 @@
 #include "motr.h"
 #include <NewPing.h>
 #include <arduino.h>
+#include <servo.h>
 
 // Pins for distance sensor
 
